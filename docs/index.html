@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>de-monkey-v</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #000;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      cursor: crosshair;
+    }
+    canvas { display: block; }
+
+    /* Overlay UI */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 2rem;
+    }
+    .logo {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.9);
+      letter-spacing: -0.02em;
+    }
+    .links {
+      display: flex;
+      gap: 1.5rem;
+    }
+    .links a {
+      pointer-events: auto;
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+    .links a:hover { color: rgba(255,255,255,0.9); }
+
+    .center-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+    .center-text h1 {
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      text-shadow: 0 0 80px rgba(88,166,255,0.3);
+      margin-bottom: 0.75rem;
+    }
+    .center-text p {
+      font-size: clamp(0.9rem, 1.5vw, 1.15rem);
+      color: rgba(255,255,255,0.45);
+      font-weight: 400;
+    }
+
+    .bottom-bar {
+      position: absolute;
+      bottom: 1.5rem;
+      left: 0;
+      width: 100%;
+      text-align: center;
+    }
+    .hint {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.25);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    /* Controls panel */
+    .controls {
+      position: fixed;
+      bottom: 3.5rem;
+      right: 2rem;
+      pointer-events: auto;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .ctrl-btn {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.6);
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .ctrl-btn:hover {
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+    }
+    .ctrl-btn.active {
+      background: rgba(88,166,255,0.2);
+      border-color: rgba(88,166,255,0.4);
+      color: #58a6ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    <div class="top-bar">
+      <div class="logo">de-monkey-v</div>
+      <div class="links">
+        <a href="https://github.com/de-monkey-v">GitHub</a>
+        <a href="https://github.com/de-monkey-v/hyper-team">hyper-team</a>
+        <a href="https://de-monkey-v.github.io/hyper-team/">Docs</a>
+      </div>
+    </div>
+    <div class="center-text">
+      <h1>de-monkey-v</h1>
+      <p>Claude Code Plugin Developer</p>
+    </div>
+    <div class="bottom-bar">
+      <span class="hint">Move mouse &middot; Click to burst &middot; Scroll to zoom</span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="ctrl-btn active" data-mode="particles">Particles</button>
+    <button class="ctrl-btn" data-mode="geometry">Geometry</button>
+    <button class="ctrl-btn" data-mode="wave">Wave</button>
+  </div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+
+    // --- Setup ---
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 1000);
+    camera.position.z = 30;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setClearColor(0x000000);
+    document.body.prepend(renderer.domElement);
+
+    // --- Mouse ---
+    const mouse = new THREE.Vector2(0, 0);
+    const mouse3D = new THREE.Vector3(0, 0, 0);
+    let targetZoom = 30;
+
+    addEventListener('mousemove', e => {
+      mouse.x = (e.clientX / innerWidth) * 2 - 1;
+      mouse.y = -(e.clientY / innerHeight) * 2 + 1;
+      mouse3D.set(mouse.x * 20, mouse.y * 12, 0);
+    });
+
+    addEventListener('wheel', e => {
+      targetZoom = THREE.MathUtils.clamp(targetZoom + e.deltaY * 0.02, 10, 60);
+    });
+
+    addEventListener('resize', () => {
+      camera.aspect = innerWidth / innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+    });
+
+    // --- Color palette ---
+    const palette = [
+      new THREE.Color(0x58a6ff),  // blue
+      new THREE.Color(0xbc8cff),  // purple
+      new THREE.Color(0x3fb950),  // green
+      new THREE.Color(0xf778ba),  // pink
+      new THREE.Color(0x39d2c0),  // cyan
+    ];
+
+    // ============================
+    // MODE 1: Particles
+    // ============================
+    const PARTICLE_COUNT = 4000;
+    const particleGeo = new THREE.BufferGeometry();
+    const particlePositions = new Float32Array(PARTICLE_COUNT * 3);
+    const particleColors = new Float32Array(PARTICLE_COUNT * 3);
+    const particleVelocities = [];
+    const particleSizes = new Float32Array(PARTICLE_COUNT);
+
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      const i3 = i * 3;
+      particlePositions[i3] = (Math.random() - 0.5) * 60;
+      particlePositions[i3 + 1] = (Math.random() - 0.5) * 40;
+      particlePositions[i3 + 2] = (Math.random() - 0.5) * 40;
+
+      const c = palette[Math.floor(Math.random() * palette.length)];
+      particleColors[i3] = c.r;
+      particleColors[i3 + 1] = c.g;
+      particleColors[i3 + 2] = c.b;
+
+      particleVelocities.push({
+        x: (Math.random() - 0.5) * 0.02,
+        y: (Math.random() - 0.5) * 0.02,
+        z: (Math.random() - 0.5) * 0.02,
+      });
+
+      particleSizes[i] = Math.random() * 3 + 1;
+    }
+
+    particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+    particleGeo.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
+    particleGeo.setAttribute('size', new THREE.BufferAttribute(particleSizes, 1));
+
+    const particleMat = new THREE.ShaderMaterial({
+      vertexShader: `
+        attribute float size;
+        attribute vec3 color;
+        varying vec3 vColor;
+        varying float vAlpha;
+        void main() {
+          vColor = color;
+          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+          float dist = length(mvPosition.xyz);
+          vAlpha = smoothstep(60.0, 5.0, dist);
+          gl_PointSize = size * (200.0 / -mvPosition.z);
+          gl_Position = projectionMatrix * mvPosition;
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vColor;
+        varying float vAlpha;
+        void main() {
+          float d = length(gl_PointCoord - 0.5);
+          if (d > 0.5) discard;
+          float alpha = smoothstep(0.5, 0.1, d) * vAlpha;
+          gl_FragColor = vec4(vColor, alpha * 0.8);
+        }
+      `,
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    });
+
+    const particles = new THREE.Points(particleGeo, particleMat);
+    scene.add(particles);
+
+    // Burst on click
+    addEventListener('click', () => {
+      if (currentMode !== 'particles') return;
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        const i3 = i * 3;
+        const dx = particlePositions[i3] - mouse3D.x;
+        const dy = particlePositions[i3 + 1] - mouse3D.y;
+        const dist = Math.sqrt(dx * dx + dy * dy) + 0.1;
+        if (dist < 10) {
+          const force = (10 - dist) * 0.08;
+          particleVelocities[i].x += (dx / dist) * force;
+          particleVelocities[i].y += (dy / dist) * force;
+        }
+      }
+    });
+
+    function updateParticles(time) {
+      const pos = particlePositions;
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        const i3 = i * 3;
+        const v = particleVelocities[i];
+
+        // Attract to mouse gently
+        const dx = mouse3D.x - pos[i3];
+        const dy = mouse3D.y - pos[i3 + 1];
+        const dist = Math.sqrt(dx * dx + dy * dy) + 0.1;
+        const attract = Math.min(0.0003, 0.02 / dist);
+        v.x += dx * attract;
+        v.y += dy * attract;
+
+        // Damping
+        v.x *= 0.995;
+        v.y *= 0.995;
+        v.z *= 0.995;
+
+        pos[i3] += v.x;
+        pos[i3 + 1] += v.y;
+        pos[i3 + 2] += v.z;
+
+        // Wrap around
+        if (pos[i3] > 35) pos[i3] = -35;
+        if (pos[i3] < -35) pos[i3] = 35;
+        if (pos[i3 + 1] > 25) pos[i3 + 1] = -25;
+        if (pos[i3 + 1] < -25) pos[i3 + 1] = 25;
+      }
+      particleGeo.attributes.position.needsUpdate = true;
+    }
+
+    // ============================
+    // MODE 2: Geometry
+    // ============================
+    const geoGroup = new THREE.Group();
+    scene.add(geoGroup);
+    geoGroup.visible = false;
+
+    const geometries = [
+      new THREE.IcosahedronGeometry(3, 1),
+      new THREE.OctahedronGeometry(2.5, 0),
+      new THREE.TorusGeometry(2, 0.7, 16, 40),
+      new THREE.TorusKnotGeometry(2, 0.5, 80, 16),
+      new THREE.DodecahedronGeometry(2.5, 0),
+    ];
+
+    const geoMeshes = [];
+    for (let i = 0; i < geometries.length; i++) {
+      const mat = new THREE.MeshPhysicalMaterial({
+        color: palette[i],
+        metalness: 0.3,
+        roughness: 0.2,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.7,
+      });
+      const mesh = new THREE.Mesh(geometries[i], mat);
+      const angle = (i / geometries.length) * Math.PI * 2;
+      mesh.position.set(Math.cos(angle) * 10, Math.sin(angle) * 6, 0);
+      mesh.userData = {
+        basePos: mesh.position.clone(),
+        rotSpeed: { x: Math.random() * 0.02, y: Math.random() * 0.02, z: Math.random() * 0.01 },
+        floatOffset: Math.random() * Math.PI * 2,
+      };
+      geoGroup.add(mesh);
+      geoMeshes.push(mesh);
+    }
+
+    // Lights for geometry mode
+    const ambientLight = new THREE.AmbientLight(0x404040, 2);
+    scene.add(ambientLight);
+    const pointLight = new THREE.PointLight(0x58a6ff, 100, 100);
+    pointLight.position.set(0, 0, 15);
+    scene.add(pointLight);
+
+    // Click on geometry to explode/reform
+    let geoExploded = false;
+    addEventListener('click', () => {
+      if (currentMode !== 'geometry') return;
+      geoExploded = !geoExploded;
+    });
+
+    function updateGeometry(time) {
+      geoMeshes.forEach((mesh, i) => {
+        const d = mesh.userData;
+        mesh.rotation.x += d.rotSpeed.x;
+        mesh.rotation.y += d.rotSpeed.y;
+        mesh.rotation.z += d.rotSpeed.z;
+
+        const targetScale = geoExploded ? 1.8 : 1;
+        mesh.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.05);
+
+        const explodeFactor = geoExploded ? 2.2 : 1;
+        const floatY = Math.sin(time * 0.001 + d.floatOffset) * 0.8;
+        mesh.position.x += (d.basePos.x * explodeFactor - mesh.position.x) * 0.03;
+        mesh.position.y += (d.basePos.y * explodeFactor + floatY - mesh.position.y) * 0.03;
+
+        // React to mouse
+        const dx = mouse3D.x * 0.3 - mesh.position.x;
+        const dy = mouse3D.y * 0.3 - mesh.position.y;
+        mesh.position.x += dx * 0.008;
+        mesh.position.y += dy * 0.008;
+      });
+
+      pointLight.position.x = mouse3D.x * 0.5;
+      pointLight.position.y = mouse3D.y * 0.5;
+    }
+
+    // ============================
+    // MODE 3: Wave
+    // ============================
+    const WAVE_COLS = 80;
+    const WAVE_ROWS = 50;
+    const WAVE_SPACING = 0.7;
+    const waveGeo = new THREE.BufferGeometry();
+    const wavePositions = new Float32Array(WAVE_COLS * WAVE_ROWS * 3);
+    const waveColors = new Float32Array(WAVE_COLS * WAVE_ROWS * 3);
+
+    for (let iy = 0; iy < WAVE_ROWS; iy++) {
+      for (let ix = 0; ix < WAVE_COLS; ix++) {
+        const idx = (iy * WAVE_COLS + ix) * 3;
+        wavePositions[idx] = (ix - WAVE_COLS / 2) * WAVE_SPACING;
+        wavePositions[idx + 1] = 0;
+        wavePositions[idx + 2] = (iy - WAVE_ROWS / 2) * WAVE_SPACING;
+      }
+    }
+
+    waveGeo.setAttribute('position', new THREE.BufferAttribute(wavePositions, 3));
+    waveGeo.setAttribute('color', new THREE.BufferAttribute(waveColors, 3));
+
+    const waveMat = new THREE.PointsMaterial({
+      size: 2.5,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.8,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+
+    const waveMesh = new THREE.Points(waveGeo, waveMat);
+    waveMesh.rotation.x = -0.6;
+    waveMesh.position.y = -3;
+    waveMesh.visible = false;
+    scene.add(waveMesh);
+
+    // Click to create ripple
+    let ripples = [];
+    addEventListener('click', () => {
+      if (currentMode !== 'wave') return;
+      ripples.push({ x: mouse3D.x, y: mouse3D.y, time: performance.now(), strength: 4 });
+    });
+
+    function updateWave(time) {
+      const t = time * 0.001;
+      for (let iy = 0; iy < WAVE_ROWS; iy++) {
+        for (let ix = 0; ix < WAVE_COLS; ix++) {
+          const idx = (iy * WAVE_COLS + ix) * 3;
+          const x = wavePositions[idx];
+          const z = wavePositions[idx + 2];
+
+          // Base wave
+          let y = Math.sin(x * 0.3 + t * 1.5) * 1.2 +
+                  Math.sin(z * 0.2 + t * 1.1) * 0.8 +
+                  Math.sin((x + z) * 0.15 + t * 0.8) * 0.6;
+
+          // Mouse influence
+          const mx = mouse3D.x - x;
+          const mz = mouse3D.y * 0.8 - z;
+          const mDist = Math.sqrt(mx * mx + mz * mz);
+          y += Math.sin(mDist * 0.5 - t * 3) * Math.max(0, 3 - mDist) * 0.5;
+
+          // Ripples
+          for (const r of ripples) {
+            const age = (time - r.time) * 0.001;
+            if (age > 4) continue;
+            const rx = r.x - x;
+            const rz = r.y * 0.8 - z;
+            const rDist = Math.sqrt(rx * rx + rz * rz);
+            const wave = Math.sin(rDist * 1.5 - age * 6) * r.strength * Math.exp(-age * 1.2) * Math.exp(-rDist * 0.08);
+            y += wave;
+          }
+
+          wavePositions[idx + 1] = y;
+
+          // Color based on height
+          const normalizedY = (y + 4) / 8;
+          const c = palette[Math.floor(normalizedY * palette.length) % palette.length];
+          const c2 = palette[(Math.floor(normalizedY * palette.length) + 1) % palette.length];
+          const mix = (normalizedY * palette.length) % 1;
+          waveColors[idx] = c.r + (c2.r - c.r) * mix;
+          waveColors[idx + 1] = c.g + (c2.g - c.g) * mix;
+          waveColors[idx + 2] = c.b + (c2.b - c.b) * mix;
+        }
+      }
+      waveGeo.attributes.position.needsUpdate = true;
+      waveGeo.attributes.color.needsUpdate = true;
+
+      // Clean old ripples
+      ripples = ripples.filter(r => (time - r.time) < 4000);
+    }
+
+    // ============================
+    // Mode switching
+    // ============================
+    let currentMode = 'particles';
+    const modeButtons = document.querySelectorAll('.ctrl-btn');
+
+    modeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const mode = btn.dataset.mode;
+        if (mode === currentMode) return;
+
+        currentMode = mode;
+        modeButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        particles.visible = mode === 'particles';
+        geoGroup.visible = mode === 'geometry';
+        waveMesh.visible = mode === 'wave';
+      });
+    });
+
+    // ============================
+    // Background stars
+    // ============================
+    const starGeo = new THREE.BufferGeometry();
+    const starCount = 800;
+    const starPositions = new Float32Array(starCount * 3);
+    for (let i = 0; i < starCount; i++) {
+      starPositions[i * 3] = (Math.random() - 0.5) * 200;
+      starPositions[i * 3 + 1] = (Math.random() - 0.5) * 200;
+      starPositions[i * 3 + 2] = -50 - Math.random() * 50;
+    }
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+    const starMat = new THREE.PointsMaterial({
+      size: 0.5,
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.3,
+    });
+    scene.add(new THREE.Points(starGeo, starMat));
+
+    // ============================
+    // Animate
+    // ============================
+    function animate(time) {
+      requestAnimationFrame(animate);
+
+      // Smooth camera zoom
+      camera.position.z += (targetZoom - camera.position.z) * 0.05;
+
+      // Gentle camera sway
+      camera.position.x += (mouse.x * 2 - camera.position.x) * 0.02;
+      camera.position.y += (mouse.y * 1.5 - camera.position.y) * 0.02;
+      camera.lookAt(0, 0, 0);
+
+      if (currentMode === 'particles') updateParticles(time);
+      if (currentMode === 'geometry') updateGeometry(time);
+      if (currentMode === 'wave') updateWave(time);
+
+      renderer.render(scene, camera);
+    }
+
+    animate(0);
+  </script>
+</body>
+</html>

@@ -1,16 +1,32 @@
-## Hi there 👋
+<div align="center">
 
-<!--
-**de-monkey-v/de-monkey-v** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+# de-monkey-v
 
-Here are some ideas to get you started:
+**Claude Code Plugin Developer**
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+[![Interactive 3D Portfolio](https://img.shields.io/badge/Interactive_3D_Portfolio-%E2%86%92-58a6ff?style=for-the-badge&logoColor=white)](https://de-monkey-v.github.io/de-monkey-v/)
+
+</div>
+
+---
+
+### hyper-team
+
+A collection of Claude Code plugins for power users.
+
+| Plugin | What it does | How I use it |
+|--------|-------------|--------------|
+| **[search](https://github.com/de-monkey-v/hyper-team/tree/main/plugins/search)** | Unified search with Tavily/Brave load balancing | `smart-searcher` auto-selects the best source |
+| **[notification](https://github.com/de-monkey-v/hyper-team/tree/main/plugins/notification)** | Slack, Discord, Desktop alerts | Runs automatically via hooks |
+| **[ai-cli-tools](https://github.com/de-monkey-v/hyper-team/tree/main/plugins/ai-cli-tools)** | Gemini & Codex integration | `@llms` subagent for second opinions |
+| **[git-utils](https://github.com/de-monkey-v/hyper-team/tree/main/plugins/git-utils)** | Git workflow automation | Mostly just `/commit` |
+| **[hyper-team](https://github.com/de-monkey-v/hyper-team/tree/main/plugins/hyper-team)** | Agent Teams workflow helper | `make-prompt` → clean context → paste, or `just-do-it` → `verify` |
+| **[plugin-creator](https://github.com/de-monkey-v/hyper-team/tree/main/plugins/plugin-creator)** | Plugin scaffolding toolkit | `create` for new, `modify` for existing |
+
+```bash
+# Install
+/plugin marketplace add de-monkey-v/hyper-team
+```
+
+[![hyper-team](https://img.shields.io/badge/hyper--team-Docs-161b22?style=flat-square&logo=github)](https://de-monkey-v.github.io/hyper-team/)
+[![MIT](https://img.shields.io/badge/License-MIT-3fb950?style=flat-square)](https://github.com/de-monkey-v/hyper-team/blob/main/LICENSE)
