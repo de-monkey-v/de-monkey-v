@@ -280,8 +280,9 @@
       }
     });
 
-    function updateParticles(time) {
+    function updateParticles(time, dtScale) {
       const pos = particlePositions;
+      const damping = Math.pow(0.995, dtScale);
       for (let i = 0; i < PARTICLE_COUNT; i++) {
         const i3 = i * 3;
         const v = particleVelocities[i];
@@ -290,18 +291,18 @@
         const dx = mouse3D.x - pos[i3];
         const dy = mouse3D.y - pos[i3 + 1];
         const dist = Math.sqrt(dx * dx + dy * dy) + 0.1;
-        const attract = Math.min(0.0003, 0.02 / dist);
+        const attract = Math.min(0.0003, 0.02 / dist) * dtScale;
         v.x += dx * attract;
         v.y += dy * attract;
 
         // Damping
-        v.x *= 0.995;
-        v.y *= 0.995;
-        v.z *= 0.995;
+        v.x *= damping;
+        v.y *= damping;
+        v.z *= damping;
 
-        pos[i3] += v.x;
-        pos[i3 + 1] += v.y;
-        pos[i3 + 2] += v.z;
+        pos[i3] += v.x * dtScale;
+        pos[i3 + 1] += v.y * dtScale;
+        pos[i3 + 2] += v.z * dtScale;
 
         // Wrap around
         if (pos[i3] > 35) pos[i3] = -35;
@@ -363,26 +364,29 @@
       geoExploded = !geoExploded;
     });
 
-    function updateGeometry(time) {
+    function updateGeometry(time, dtScale) {
       geoMeshes.forEach((mesh, i) => {
         const d = mesh.userData;
-        mesh.rotation.x += d.rotSpeed.x;
-        mesh.rotation.y += d.rotSpeed.y;
-        mesh.rotation.z += d.rotSpeed.z;
+        mesh.rotation.x += d.rotSpeed.x * dtScale;
+        mesh.rotation.y += d.rotSpeed.y * dtScale;
+        mesh.rotation.z += d.rotSpeed.z * dtScale;
 
         const targetScale = geoExploded ? 1.8 : 1;
-        mesh.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.05);
+        const scaleLerp = 1 - Math.pow(0.95, dtScale);
+        mesh.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), scaleLerp);
 
         const explodeFactor = geoExploded ? 2.2 : 1;
         const floatY = Math.sin(time * 0.001 + d.floatOffset) * 0.8;
-        mesh.position.x += (d.basePos.x * explodeFactor - mesh.position.x) * 0.03;
-        mesh.position.y += (d.basePos.y * explodeFactor + floatY - mesh.position.y) * 0.03;
+        const posLerp = 1 - Math.pow(0.97, dtScale);
+        mesh.position.x += (d.basePos.x * explodeFactor - mesh.position.x) * posLerp;
+        mesh.position.y += (d.basePos.y * explodeFactor + floatY - mesh.position.y) * posLerp;
 
         // React to mouse
         const dx = mouse3D.x * 0.3 - mesh.position.x;
         const dy = mouse3D.y * 0.3 - mesh.position.y;
-        mesh.position.x += dx * 0.008;
-        mesh.position.y += dy * 0.008;
+        const mouseLerp = 1 - Math.pow(0.992, dtScale);
+        mesh.position.x += dx * mouseLerp;
+        mesh.position.y += dy * mouseLerp;
       });
 
       pointLight.position.x = mouse3D.x * 0.5;
@@ -544,21 +548,31 @@
     scene.add(new THREE.Points(starGeo, starMat));
 
     // ============================
-    // Animate
+    // Animate (delta-time based)
     // ============================
+    let prevTime = 0;
+    const TARGET_FPS = 60;
+    const TARGET_DT = 1000 / TARGET_FPS;
+
     function animate(time) {
       requestAnimationFrame(animate);
 
+      const rawDt = prevTime ? time - prevTime : TARGET_DT;
+      prevTime = time;
+      // Clamp dt to avoid spiral of death and cap at 3x normal
+      const dt = Math.min(rawDt, TARGET_DT * 3);
+      const dtScale = dt / TARGET_DT;  // 1.0 at 60fps
+
       // Smooth camera zoom
-      camera.position.z += (targetZoom - camera.position.z) * 0.05;
+      camera.position.z += (targetZoom - camera.position.z) * (1 - Math.pow(0.95, dtScale));
 
       // Gentle camera sway
-      camera.position.x += (mouse.x * 2 - camera.position.x) * 0.02;
-      camera.position.y += (mouse.y * 1.5 - camera.position.y) * 0.02;
+      camera.position.x += (mouse.x * 2 - camera.position.x) * (1 - Math.pow(0.98, dtScale));
+      camera.position.y += (mouse.y * 1.5 - camera.position.y) * (1 - Math.pow(0.98, dtScale));
       camera.lookAt(0, 0, 0);
 
-      if (currentMode === 'particles') updateParticles(time);
-      if (currentMode === 'geometry') updateGeometry(time);
+      if (currentMode === 'particles') updateParticles(time, dtScale);
+      if (currentMode === 'geometry') updateGeometry(time, dtScale);
       if (currentMode === 'wave') updateWave(time);
 
       renderer.render(scene, camera);
