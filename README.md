@@ -1,10 +1,10 @@
 <div align="center">
 
-# de-monkey-v
+<a href="https://de-monkey-v.github.io/de-monkey-v/">
+  <img src="profile-banner.gif" alt="Interactive 3D Portfolio - Click to explore" width="100%">
+</a>
 
-**Claude Code Plugin Developer**
-
-[![Interactive 3D Portfolio](https://img.shields.io/badge/Interactive_3D_Portfolio-%E2%86%92-58a6ff?style=for-the-badge&logoColor=white)](https://de-monkey-v.github.io/de-monkey-v/)
+*Click the banner to explore the interactive 3D version*
 
 </div>
 
