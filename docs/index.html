@@ -392,9 +392,9 @@
     // ============================
     // MODE 3: Wave
     // ============================
-    const WAVE_COLS = 80;
-    const WAVE_ROWS = 50;
-    const WAVE_SPACING = 0.7;
+    const WAVE_COLS = 70;
+    const WAVE_ROWS = 45;
+    const WAVE_SPACING = 0.8;
     const waveGeo = new THREE.BufferGeometry();
     const wavePositions = new Float32Array(WAVE_COLS * WAVE_ROWS * 3);
     const waveColors = new Float32Array(WAVE_COLS * WAVE_ROWS * 3);
@@ -411,18 +411,38 @@
     waveGeo.setAttribute('position', new THREE.BufferAttribute(wavePositions, 3));
     waveGeo.setAttribute('color', new THREE.BufferAttribute(waveColors, 3));
 
-    const waveMat = new THREE.PointsMaterial({
-      size: 2.5,
-      vertexColors: true,
+    const waveMat = new THREE.ShaderMaterial({
+      vertexShader: `
+        attribute vec3 color;
+        varying vec3 vColor;
+        varying float vAlpha;
+        void main() {
+          vColor = color;
+          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+          vAlpha = smoothstep(60.0, 5.0, length(mvPosition.xyz));
+          gl_PointSize = 120.0 / -mvPosition.z;
+          gl_Position = projectionMatrix * mvPosition;
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vColor;
+        varying float vAlpha;
+        void main() {
+          float d = length(gl_PointCoord - 0.5);
+          if (d > 0.5) discard;
+          float alpha = smoothstep(0.5, 0.1, d) * vAlpha * 0.85;
+          gl_FragColor = vec4(vColor, alpha);
+        }
+      `,
       transparent: true,
-      opacity: 0.8,
-      blending: THREE.AdditiveBlending,
       depthWrite: false,
+      blending: THREE.AdditiveBlending,
     });
 
     const waveMesh = new THREE.Points(waveGeo, waveMat);
-    waveMesh.rotation.x = -0.6;
-    waveMesh.position.y = -3;
+    waveMesh.rotation.x = -0.55;
+    waveMesh.position.y = 2;
+    waveMesh.position.z = 0;
     waveMesh.visible = false;
     scene.add(waveMesh);
 
@@ -442,9 +462,9 @@
           const z = wavePositions[idx + 2];
 
           // Base wave
-          let y = Math.sin(x * 0.3 + t * 1.5) * 1.2 +
-                  Math.sin(z * 0.2 + t * 1.1) * 0.8 +
-                  Math.sin((x + z) * 0.15 + t * 0.8) * 0.6;
+          let y = Math.sin(x * 0.3 + t * 1.5) * 1.5 +
+                  Math.sin(z * 0.2 + t * 1.1) * 1.0 +
+                  Math.sin((x + z) * 0.15 + t * 0.8) * 0.7;
 
           // Mouse influence
           const mx = mouse3D.x - x;
