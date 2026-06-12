@@ -1,6 +1,6 @@
 # Gyuhyeon Lee
 
-Backend engineer who builds beyond the server: product APIs, database design, data migration, desktop UI, native modules, deployment workflows, and AI-assisted tooling.
+Backend-focused developer with hands-on experience across product APIs, database design, data migration, desktop UI, native modules, deployment workflows, and AI-assisted tooling.
 
 [한국어](#korean) | [English](#english)
 
@@ -11,9 +11,9 @@ Backend engineer who builds beyond the server: product APIs, database design, da
 
 ### 소개
 
-저는 Spring Boot와 Java 기반 제품 서버 개발을 중심으로 시작했지만, 필요한 문제가 생기면 클라이언트, 데스크톱 UI, C++ 모듈, 데이터 마이그레이션, 인프라, AI 자동화까지 직접 파고드는 개발자입니다.
+저는 서버 개발을 목표로 입사했지만, 초반에는 데스크톱 UI, C++ 모듈, 레거시 Web demo와 데이터 마이그레이션 등 다양한 업무를 먼저 맡았습니다. 최근에는 Spring Boot와 Java 기반 제품 서버를 담당하며 DB 설계, API 구현, 테스트, 내부 배포, 패치노트 자동화까지 이어지는 개발 흐름을 경험했습니다.
 
-제품 서버에서는 DB 설계, API 구현, 테스트, 내부 배포, 패치노트 자동화까지 개발 흐름 전반을 경험했습니다. 동시에 레거시 데스크톱 제품의 Web demo 전환, WPF UI 구조 개선, C++ DLL 모듈 구현, DB diagram 개인 프로젝트, LLM/AI 도구 활용까지 폭넓게 다뤄왔습니다.
+이런 흐름 덕분에 서버만 따로 보는 것이 아니라, 클라이언트, 데스크톱 앱, 레거시 데이터, 인프라, AI 자동화가 제품 개발 안에서 어떻게 연결되는지 함께 보려고 합니다. 레거시 데스크톱 제품의 Web demo 전환, WPF UI 구조 개선, C++ DLL 모듈 구현, DB diagram 개인 프로젝트, LLM/AI 도구 활용까지 폭넓게 다뤄왔습니다.
 
 ### 해본 일
 
@@ -80,9 +80,9 @@ Codex, Claude Code, MCP, CLI, RAG, LangChain, LangGraph, Vector DB, Graph DB, La
 
 ### About
 
-I am a backend engineer whose core experience is building Spring Boot and Java-based product servers, but I often work beyond the server when the product needs it: client-side flows, desktop UI, C++ modules, data migration, deployment workflows, and AI-assisted automation.
+I joined my current career path with the goal of working on server/backend development, but my early work covered adjacent areas first: desktop UI, C++ modules, legacy web demos, and data migration. More recently, I took ownership of a Spring Boot and Java-based product server and worked across database design, API implementation, testing, internal deployment, and release-note automation.
 
-I have worked across database design, API implementation, integration testing, internal deployment, and release-note automation. I have also built a web demo from a legacy desktop product, improved WPF UI structure, implemented a C++ DLL module, created a DB diagram product, and explored LLM/AI tooling in practical development workflows.
+That path shaped how I work: I try to understand how the server connects with client flows, desktop apps, legacy data, infrastructure, and automation. I have also built a web demo from a legacy desktop product, improved WPF UI structure, implemented a C++ DLL module, created a DB diagram product, and explored LLM/AI tooling in practical development workflows.
 
 ### What I Have Worked On
 
