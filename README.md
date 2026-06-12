@@ -2,7 +2,7 @@
 
 I'm a backend engineer focused on Spring Boot, Java, database design, API development, testing, and deployment automation.
 
-At Osstem Implant, I developed the Spring Boot server for OneOrtho, a clear aligner-related software product used by dental technicians. I implemented 130+ service APIs, designed and extended around 30 database tables, and wrote around 600 integration test methods for key scenarios such as authentication, authorization, workspace management, and file upload flows.
+In my current role, I developed a Spring Boot server for a B2B domain product. I implemented 130+ service APIs, designed and extended around 30 database tables, and wrote around 600 integration test methods for key scenarios such as authentication, authorization, workspace management, and file upload flows.
 
 ## What I Work On
 
