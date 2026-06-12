@@ -1,32 +1,44 @@
-<div align="center">
+# Hi, I'm Gyuhyeon Lee
 
-<a href="https://de-monkey-v.github.io/de-monkey-v/">
-  <img src="profile-banner.gif" alt="Interactive 3D Portfolio - Click to explore" width="100%">
-</a>
+I'm a backend engineer focused on Spring Boot, Java, database design, API development, testing, and deployment automation.
 
-*Click the banner to explore the interactive 3D version*
+At Osstem Implant, I developed the Spring Boot server for OneOrtho, a clear aligner-related software product used by dental technicians. I implemented 130+ service APIs, designed and extended around 30 database tables, and wrote around 600 integration test methods for key scenarios such as authentication, authorization, workspace management, and file upload flows.
 
-</div>
+## What I Work On
 
----
+- Backend API design and implementation with Spring Boot and Java 17
+- Database modeling with MariaDB, PostgreSQL, JPA, QueryDSL, and Flyway
+- Integration testing for real user scenarios
+- Internal deployment workflows with Docker Compose, k3s, Harbor, and WSL2
+- Developer automation using Codex, Claude Code, MCP, CLI tools, and custom skills
 
-### hyper-team
+## Featured Project
 
-A collection of Claude Code plugins for power users.
+### SchemaHatch
 
-| Plugin | What it does | How I use it |
-|--------|-------------|--------------|
-| **[search](https://github.com/de-monkey-v/hyper-team/tree/main/plugins/search)** | Unified search with Tavily/Brave load balancing | `smart-searcher` auto-selects the best source |
-| **[notification](https://github.com/de-monkey-v/hyper-team/tree/main/plugins/notification)** | Slack, Discord, Desktop alerts | Runs automatically via hooks |
-| **[ai-cli-tools](https://github.com/de-monkey-v/hyper-team/tree/main/plugins/ai-cli-tools)** | Gemini & Codex integration | `@llms` subagent for second opinions |
-| **[git-utils](https://github.com/de-monkey-v/hyper-team/tree/main/plugins/git-utils)** | Git workflow automation | Mostly just `/commit` |
-| **[hyper-team](https://github.com/de-monkey-v/hyper-team/tree/main/plugins/hyper-team)** | Agent Teams workflow helper | `make-prompt` → clean context → paste, or `just-do-it` → `verify` |
-| **[plugin-creator](https://github.com/de-monkey-v/hyper-team/tree/main/plugins/plugin-creator)** | Plugin scaffolding toolkit | `create` for new, `modify` for existing |
+SchemaHatch is a DB diagram and schema management tool I built as a personal project.
 
-```bash
-# Install
-/plugin marketplace add de-monkey-v/hyper-team
-```
+- Project/branch/revision-based schema workflow
+- Prisma, SQL, and DBML import
+- PostgreSQL introspection
+- SQL, DBML, Prisma, and JSON export APIs
+- MCP and CLI integration
+- Deployed with Railway and Cloudflare
+- CLI published as `@schemahatch/cli`
 
-[![hyper-team](https://img.shields.io/badge/hyper--team-Docs-161b22?style=flat-square&logo=github)](https://de-monkey-v.github.io/hyper-team/)
-[![MIT](https://img.shields.io/badge/License-MIT-3fb950?style=flat-square)](https://github.com/de-monkey-v/hyper-team/blob/main/LICENSE)
+Site: https://schemahatch.com/  
+CLI: https://www.npmjs.com/package/@schemahatch/cli
+
+## Tech Stack
+
+**Languages**  
+Java, TypeScript, JavaScript, C#, C++, SQL
+
+**Backend**  
+Spring Boot, Java 17, Spring JPA, QueryDSL, REST API, NestJS
+
+**Database / Infra**  
+MariaDB, PostgreSQL, MSSQL, Redis, Kafka, MinIO, Docker Compose, k3s, Harbor, WSL2, Railway, Cloudflare
+
+**Client / Tools**  
+React, Vue, WPF, Qt, MCP, CLI, Codex, Claude Code
