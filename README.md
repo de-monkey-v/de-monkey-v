@@ -1,8 +1,8 @@
-## Backend systems for agentic work.
+## Backend systems. Agent workflows.
 
-- Building APIs, data models, and workflow engines.
+- APIs, data models, and workflow engines.
 - Shipped [SchemaHatch](https://schemahatch.com/) for database schema workflows.
-- Exploring Codex, MCP, and practical agent automation.
+- Exploring Codex, MCP, and practical automation.
 
 ## Contact
 
